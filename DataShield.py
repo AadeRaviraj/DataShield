@@ -5,14 +5,131 @@ import schedule
 import shutil
 import hashlib
 import zipfile
+import smtplib
+from email.message import EmailMessage 
+
+# 1. Logging System
+# Create a Logs/folder
+# Store:
+    # Backup start time
+    # Files copied
+    # Zip file name
+    # Errors (if any)
+def LogDetailFolderFile(BackupStartTime,FileCopies,Zipfilename, error=None):
+    
+    logFolderName = "Logfile_Backup_Info"
+    logPath =""
+    ret = os.path.exists(logFolderName)
+    if ret == True:
+            timestamp = time.strftime("%Y-%m-%d_%H-%M-%S")
+            logfilename = "Logfile" 
+            createlogfile = logfilename + "_"+timestamp +".log"
+            
+            logPath = os.path.join(logFolderName,createlogfile)
+            fobj = open(logPath,"w")
+            
+            fobj.write("Backup Start time is : "+BackupStartTime+"\n")
+            fobj.write("FileCopies name : "+ str(FileCopies) + "\n")
+            fobj.write("Zip File name :"+ Zipfilename +" \n")
+            fobj.close()
+            # fobj.write(f"{error}")
+    else:
+        print("Logfile_Backup_Info is created now....")
+        
+        ret = os.makedirs(logFolderName, exist_ok= True)
+
+        print(f"{logFolderName} is created successfully ")
+        
+        timestamp = time.strftime("%Y-%m-%d_%H-%M-%S")
+        logfilename = "Logfile" 
+        createlogfile = logfilename + "_"+timestamp +".log"
+        
+        logPath = os.path.join(logFolderName,createlogfile)
+        fobj = open(logPath,"w")
+        
+        fobj.write("Backup Start time is : \n"+BackupStartTime)
+        fobj.write("FileCopies name : \n"+ str(FileCopies))
+        fobj.write("Zip File name : \n"+ Zipfilename)
+        fobj.write(f"{error}")
+        fobj.close()
+    return createlogfile,logFolderName
+            
+
+
+
+# 2. Email Notification
+# Send an email after backup completion
+# Attach:
+# Log file
+# Zip file name
+def send_mail(logfile,logfolder ,zip_file) :
+    
+        
+    sender_email = "ravirajade2@gmail.com"
+
+    app_passward = "waiy ebld ffyb lqxv"
+    
+    
+    # receive_email ="rushikeshchavhan23@gmail.com"
+    
+    subject = "Test mail from python script" 
+    body = """Jay Ganesh, 
+        This is a test email sent using  Python.
+        Regards,
+        Raviraj Aade
+    """
+    
+    Border = "-" * 60
+    print("FFFFFFF:   --- 11",logfile)
+    
+    for FolderName , SubFolderName , FileName in os.walk(logfolder):
+        for file in FileName:
+            fullpath = os.path.join(FolderName,file)
+    
+    # create Email Object 
+    msg = EmailMessage()
+    
+    # Set mail header
+    msg["From"] = sender_email
+    msg["To"] = "ravirajaade15@gmail.com"
+    msg["Subject"] = subject
+    
+    # Add mail body
+    msg.set_content(body)
+    
+    fobj = open(fullpath,"rb")
+    data = fobj.read()
+    zipfileobj = open(zip_file,"rb")
+    file2 = zipfileobj.read()
+    print(data)
+    print("FFFFFFF:   ---",logfile)
+    msg.add_attachment(data,maintype = "text",subtype ="plain", filename =f"{fullpath}.log")
+    
+    msg.add_attachment(file2,maintype = "text",subtype ="plain", filename =f"{zip_file}.log")
+    
+    # Create SMTP SSL Connection Manually
+    smtp = smtplib.SMTP_SSL("smtp.gmail.com",465)
+    
+    # Login using Gmail + App Password
+    smtp.login(sender_email,app_passward)
+    
+    # Send the email
+    smtp.send_message(msg)
+    print("Mail send successfully")
+    fobj.close()
+    # Close Connection Manually
+    smtp.quit()
+
+
+
 
 
 
 def Make_Zip(Folder):
     timestamp = time.strftime("%Y-%m-%d_%H-%M-%S")
     Zip_name = Folder + "_" + timestamp  + ".zip"
-    # Open the zip file 
     
+    # Open the zip file     
     zobj = zipfile.ZipFile(Zip_name, "w", zipfile.ZIP_DEFLATED)
     
     for root , dirs , files in os.walk(Folder):
@@ -42,7 +159,7 @@ def BackupFiles(Source , Destination):
     
     copied_files = []
     
-    print("CReating the backup folder for backup process ")
+    print("Creating the backup folder for backup process ")
     
     os.makedirs(Destination, exist_ok=True)
     
@@ -70,17 +187,36 @@ def MarvellousDataShieldStart(Source = "Data"):
     print(Border)
     BackupName = "LogFileBackup"
     print(Border)
+    backup_starttime = time.ctime()
     print("Backup process started successfully at ", time.ctime())
     print(Border)
     
     
+    
+    
     files = BackupFiles(Source, BackupName)
-    
+    print("File name : ", files)
     zip_file = Make_Zip(BackupName)
-    
+    print("Zip file nae ", zip_file)
     print(Border)
     print("Backup Completed Successfully")
     
+    print(Border)
+    print("-----------------Log File Info ----------")
+    
+    logfile,logfolder=LogDetailFolderFile(backup_starttime,files,zip_file)
+    print("file log",logfile)
+    
+    print(Border)
+    
+    print(Border)
+    print("-------------------------- Send Mail-----------------")
+    
+    send_mail(logfile,logfolder,zip_file)
+    
+    print("file send successfully through email ")
+    
+    print(Border)
     print("Files copied : ", len(files))
     print("Zip file gets created : ", zip_file)
     print(Border)
@@ -120,7 +256,8 @@ def main():
         
         # Apply the scheduler
         schedule.every(int(sys.argv[1]) ).minutes.do(MarvellousDataShieldStart, sys.argv[2])
-        
+        # res = LogDetailFolderFile("10","a","6")
+        # print("File name ---",res)
         print(Border)
         print("Data Shield  System started successfully")
         print("Time Interval in minutes : ", sys.argv[1])
