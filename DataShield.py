@@ -204,7 +204,7 @@ def MarvellousDataShieldStart(Source = "Data"):
     print(Border)
     print("-----------------Log File Info ----------")
     
-    logfile,logfolder=LogDetailFolderFile(backup_starttime,files,zip_file)
+    logfile,logfolder = LogDetailFolderFile(backup_starttime,files,zip_file)
     print("file log",logfile)
     
     print(Border)
