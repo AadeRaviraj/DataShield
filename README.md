@@ -24,7 +24,6 @@ Automated_DataShield/
 ├── DataShield.py               # Main backup engine — backup, zip, log, and email
 ├── ExtractFile.py              # Restore feature — extract a ZIP back to a folder
 ├── HistoryTracker.py           # Displays backup history and file metadata
-├── DataShield_Old.py           # Earlier version of the script without email feature
 │
 ├── Data/                       # Source folder being monitored and backed up
 ├── LogFileBackup/              # Destination folder where backed up files are stored
