@@ -112,9 +112,7 @@ The email feature uses Gmail SMTP with a Google App Password. To configure it fo
 1. Go to your Google Account settings
 2. Enable 2-Step Verification
 3. Go to Security and generate an App Password
-4. Replace the `sender_email` and `app_passward` values in `DataShield.py`
-
-**Important:** Never push your real App Password to a public GitHub repository. Use environment variables or a separate config file added to `.gitignore` to keep credentials safe.
+4. Replace the `sender_email` and `app_passward` values in 
 
 ---
 
